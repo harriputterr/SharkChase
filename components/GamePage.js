@@ -27,6 +27,7 @@ const GamePage = ({ navigation }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [speed, setSpeed] = useState(MOVE_INTERVAL);
+  const [addedBody, setAddedBody] = useState(0);
 
   useEffect(() => {
     if (!isGameOver) {
