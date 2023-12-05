@@ -20,6 +20,7 @@ function App() {
           <Stack.Screen name="End" component={EndPage} />
         </Stack.Navigator>
       </NavigationContainer>
+      
     </GestureHandlerRootView>
   );
 }

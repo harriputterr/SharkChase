@@ -4,11 +4,13 @@ import { PanGestureHandler } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import Snake from './Snake';
 import Food from './Food';
+import { checkEatsFood } from '../utils/checkEatsFood';
+import { randFoodPos } from '../utils/randFoodPos';
 
 const SNAKE_INIT_POS = [{ x: 5, y: 5 }];
 const FOOD_INIT_POS = { x: 5, y: 20 };
-const GAME_BOUNDS = { xMin: 0, xMax: 31, yMin: 0, yMax: 44 };
-const MOVE_INTERVAL = 150;
+const GAME_BOUNDS = { xMin: 0, xMax: 32, yMin: 0, yMax: 49 };
+const MOVE_INTERVAL = 100;
 const SCORE_INCREMENT = 10;
 const SPEED_INCREMENT = 10;
 
@@ -26,17 +28,15 @@ const GamePage = ({ navigation }) => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [score, setScore] = useState(0);
-  const [speed, setSpeed] = useState(MOVE_INTERVAL);
-  const [addedBody, setAddedBody] = useState(0);
 
   useEffect(() => {
     if (!isGameOver) {
       const intervalId = setInterval(() => {
         !isPaused && moveSnake();
-      }, speed);
+      }, MOVE_INTERVAL);
       return () => clearInterval(intervalId);
     }
-  }, [snake, isGameOver, isPaused, speed]);
+  }, [snake, isGameOver, isPaused]);
 
   const handleGesture = (event) => {
     // Handle gestures to change the snake's direction
@@ -68,17 +68,15 @@ const GamePage = ({ navigation }) => {
     setIsGameOver(true);
     // Navigate to the EndPage with the final score when the game ends
     navigation.navigate('End', { score });
+    handleRestartGame();
   };
 
   const handleRestartGame = () => {
-    setIsGameOver(false);
     setDirection(Direction.Right);
     setSnake(SNAKE_INIT_POS);
     setFood(FOOD_INIT_POS);
     setScore(0);
-    setSpeed(MOVE_INTERVAL);
-    setAddedBody(0);
-  };
+  }
 
   const moveSnake = () => {
     const snakeHead = snake[0];
@@ -99,8 +97,13 @@ const GamePage = ({ navigation }) => {
         break;
       default:
         break;
-    }
 
+        // if it eats food
+        // grow snake
+
+    }
+    
+    // }
     // Check for collisions with boundaries
     if (
       newHead.x < GAME_BOUNDS.xMin ||
@@ -112,22 +115,15 @@ const GamePage = ({ navigation }) => {
       return;
     }
 
-    // Check if the snake eats the food
-    if (newHead.x === food.x && newHead.y === food.y) {
-      setFood(getRandomCoordinates());
-      setScore(score + SCORE_INCREMENT);
+    if (checkEatsFood(newHead, food, 2)){
+      setFood(randFoodPos(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
       setSnake([newHead, ...snake]);
-      setSpeed((prevSpeed) =>prevSpeed - SPEED_INCREMENT); 
-    } else {
+      setScore(score + SCORE_INCREMENT);
+    }
+    else {
       setSnake([newHead, ...snake.slice(0, -1)]);
     }
   };
-
-  const getRandomCoordinates = () => ({
-    x: Math.floor(Math.random() * (GAME_BOUNDS.xMax - GAME_BOUNDS.xMin + 1)) + GAME_BOUNDS.xMin,
-    y: Math.floor(Math.random() * (GAME_BOUNDS.yMax - GAME_BOUNDS.yMin + 1)) + GAME_BOUNDS.yMin,
-  });
-
   return (
     <PanGestureHandler onGestureEvent={handleGesture}>
       <SafeAreaView style={styles.container}>
@@ -137,10 +133,9 @@ const GamePage = ({ navigation }) => {
           <Food position={food} />
         </SafeAreaView>
         <TouchableOpacity style={styles.pauseButton} onPress={handlePausePress}>
-          <Ionicons name="pause" size={32} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={isGameOver ? handleRestartGame : handleEndGame}>
-          <Text>{isGameOver ? 'Restart Game' : 'End Game'}</Text>
+          {isPaused ? 
+          <Ionicons name="play" size={32} color="black" onPress={handlePausePress}/> : 
+          <Ionicons name="pause" size={32} color="black" onPress={handlePausePress}/>}
         </TouchableOpacity>
       </SafeAreaView>
     </PanGestureHandler>
@@ -178,6 +173,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     backgroundColor: '#ffffff',
   },
+  endOrRestart: {
+    position: 'relative',
+    bottom: 25,
+    fontSize: 20,
+    padding: 10,
+    borderWidth: 2,
+    borderRadius: 20
+    
+  }
 });
 
 export default GamePage;
