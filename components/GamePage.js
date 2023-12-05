@@ -12,7 +12,6 @@ const FOOD_INIT_POS = { x: 5, y: 20 };
 const GAME_BOUNDS = { xMin: 0, xMax: 32, yMin: 0, yMax: 49 };
 const MOVE_INTERVAL = 100;
 const SCORE_INCREMENT = 10;
-const SPEED_INCREMENT = 10;
 
 const Direction = {
   Right: 0,
@@ -98,12 +97,10 @@ const GamePage = ({ navigation }) => {
       default:
         break;
 
-        // if it eats food
-        // grow snake
+        
 
     }
     
-    // }
     // Check for collisions with boundaries
     if (
       newHead.x < GAME_BOUNDS.xMin ||
